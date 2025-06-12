@@ -19,6 +19,12 @@ This tool processes Raman spectroscopy data collected across a spatial grid to g
 - Spatial distribution maps
 - Statistical correlation analysis
 
+## 📦 Quick Install (Linux, via `uv`)
+
+```bash
+uv venv .venv && source .venv/bin/activate && uv pip install -r requirements.txt
+```
+
 
 ## 🚀 Usage
 

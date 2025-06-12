@@ -1,0 +1,6 @@
+pandas
+matplotlib
+scipy
+scikit-learn
+libpysal
+esda
