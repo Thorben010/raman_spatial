@@ -473,7 +473,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Spatial Raman Analysis Pipeline")
     parser.add_argument('--file_path', type=str, 
-                        default='/Users/thorbenp/PycharmProjects/spatial_raman/data/steffen/mapping Ta50 20250213--Scan LA Step--007--Spec.Data 1.txt',
+                        default='spatial_raman/data/mapping Ta50 20250213--Scan LA Step--007--Spec.Data 1.txt',
                         help='Path to the spectral data file.')
     parser.add_argument('--peak_ranges', type=str,
                         default="[(500.236, 530.236), (620.236, 670), (720.236, 750.236)]",
