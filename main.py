@@ -311,18 +311,27 @@ def main(args):
     plt.show()
     logging.info(f"  Saved: {run_log_dir}/mean_normalized.png")
 
-    logging.info("\n10. GENERATING WAVENUMBER MAPS...")
+    logging.info("\n10. GENERATING SPATIAL GRID MAPS...")
     # Generate wavenumber maps
     num_plots = len(peak_ranges)
     grid_size = int(np.ceil(np.sqrt(num_plots)))
-    logging.info(f"  Creating {num_plots} wavenumber maps in {grid_size}x{grid_size} grid")
+    logging.info(f"  Creating {num_plots} maps in {grid_size}x{grid_size} grid for each metric")
 
-    fig, axes = plt.subplots(grid_size, grid_size, figsize=(19, 15))
-    axes = axes.flatten()
-    fig.suptitle('', fontsize=16)
+    # Figure for Max Wavenumber
+    fig_wavenumber, axes_wavenumber = plt.subplots(grid_size, grid_size, figsize=(19, 15))
+    axes_wavenumber = axes_wavenumber.flatten()
+    fig_wavenumber.suptitle('Max Wavenumber', fontsize=16)
 
-    df_int = pd.DataFrame()
-    means = []
+    # Figure for Max Intensity
+    fig_intensity, axes_intensity = plt.subplots(grid_size, grid_size, figsize=(19, 15))
+    axes_intensity = axes_intensity.flatten()
+    fig_intensity.suptitle('Max Intensity', fontsize=16)
+
+    # Figure for Integrated Intensity
+    fig_integration, axes_integration = plt.subplots(grid_size, grid_size, figsize=(19, 15))
+    axes_integration = axes_integration.flatten()
+    fig_integration.suptitle('Integrated Intensity', fontsize=16)
+
     for index, value in enumerate(peak_ranges):
         logging.info(f"  Processing peak range {index+1}/{len(peak_ranges)}: {value}")
         df_filtered = filter_frequencies(df_clean, value)
@@ -334,21 +343,35 @@ def main(args):
         logging.info("    Calculating peak shifts...")
         max_wavenumber, max_intensity, df_integration = plot_peak_shifts(df_filtered)
         
-        value_label = f'{np.mean(max_wavenumber.mean()).round(1)}'
-        means.append(value_label)
+        # Plot for Max Wavenumber
+        value_label_wavenumber = f'{np.mean(max_wavenumber.mean()).round(1)} cm-1'
+        logging.info(f"    Creating heatmap for Max Wavenumber ({value_label_wavenumber})...")
+        plot_map_heatmap(max_wavenumber, positions, value_label_wavenumber, axes_wavenumber[index], 'Max Wavenumber (cm-1)')
+
+        # Plot for Max Intensity
+        value_label_intensity = f'{value[0]}-{value[1]} cm-1'
+        logging.info(f"    Creating heatmap for Max Intensity...")
+        plot_map_heatmap(max_intensity, positions, value_label_intensity, axes_intensity[index], 'Max Intensity (a.u.)')
         
-        logging.info(f"    Creating heatmap for {value_label}...")
-        scatter, cbar = plot_map_heatmap(max_wavenumber, positions, value_label, axes[index], 'Max Wavenumber')
+        # Plot for Integrated Intensity
+        logging.info(f"    Creating heatmap for Integrated Intensity...")
+        plot_map_heatmap(df_integration, positions, value_label_intensity, axes_integration[index], 'Integrated Intensity (a.u.)')
 
-    # Remove empty subplots
-    logging.info("  Removing empty subplots...")
-    for i in range(num_plots, len(axes)):
-        fig.delaxes(axes[i])
+    # Clean up and save plots
+    figs = {
+        'wavenumber': (fig_wavenumber, axes_wavenumber),
+        'intensity': (fig_intensity, axes_intensity),
+        'integration': (fig_integration, axes_integration)
+    }
 
-    plt.tight_layout()
-    fig.savefig(f'{run_log_dir}/spatial_grid.png', dpi=600)
-    logging.info(f"  Saved: {run_log_dir}/spatial_grid.png")
-
+    for name, (fig, axes) in figs.items():
+        logging.info(f"  Cleaning up and saving {name} grid...")
+        for i in range(num_plots, len(axes)):
+            fig.delaxes(axes[i])
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to make space for suptitle
+        fig.savefig(f'{run_log_dir}/spatial_grid_{name}.png', dpi=600)
+        logging.info(f"  Saved: {run_log_dir}/spatial_grid_{name}.png")
+        plt.close(fig)
 
     logging.info("\n" + "="*60)
     logging.info("ANALYSIS COMPLETE!")
@@ -358,9 +381,9 @@ def main(args):
     logging.info("  - all_spectra.png")
     logging.info("  - smoothed_spectra.png")
     logging.info("  - mean_normalized.png")
-    logging.info("  - spatial_grid.png")
-    logging.info("  - peak_wavenumber_maps.png")
-    logging.info("  - Individual peak maps: peak_wavenumber_map_*.png")
+    logging.info("  - spatial_grid_wavenumber.png")
+    logging.info("  - spatial_grid_intensity.png")
+    logging.info("  - spatial_grid_integration.png")
     logging.info("="*60)
 
 if __name__ == "__main__":
