@@ -258,7 +258,8 @@ def main(args):
     logging.info("\n5. REMOVING OUTLIERS...")
     logging.info("  Calculating z-scores for outlier detection...")
     z_scores = np.abs((normalized_df - normalized_df.mean()) / normalized_df.std())
-    threshold = 3
+    threshold = args.outlier_std_dev
+    logging.info(f"  Using outlier removal threshold: {threshold} standard deviations")
     outlier_indices = np.where(z_scores > threshold)
 
     df_clean = normalized_df.copy()
@@ -394,6 +395,8 @@ if __name__ == "__main__":
     parser.add_argument('--peak_ranges', type=str,
                         default="[(500.236, 530.236), (620.236, 670), (720.236, 750.236)]",
                         help="List of tuples representing peak ranges, e.g., '[(100, 150), (200, 250)]'")
+    parser.add_argument('--outlier_std_dev', type=float, default=3.0,
+                        help='Standard deviation threshold for outlier removal.')
     
     args = parser.parse_args()
     
