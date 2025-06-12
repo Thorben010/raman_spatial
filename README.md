@@ -31,7 +31,7 @@ uv venv .venv && source .venv/bin/activate && uv pip install -r requirements.txt
 Run the analysis with:
 
 ```bash
-python spatial_raman_analysis.py --file_path /path/to/your/data.txt --peak_ranges "[(500, 530), (620, 670), (720, 750)]"
+python main.py --file_path /path/to/your/data.txt --peak_ranges "[(500, 530), (620, 670), (720, 750)]"
 ```
 
 ### Arguments
@@ -44,7 +44,7 @@ python spatial_raman_analysis.py --file_path /path/to/your/data.txt --peak_range
 To run the analysis on a file named `my_data.txt` located in the `data` folder, and to analyze peaks in the ranges of 400-450 cm⁻¹ and 600-650 cm⁻¹, you would use the following command:
 
 ```bash
-python spatial_raman_analysis.py --file_path spatial_raman/data/mapping Ta50 20250213--Scan LA Step--007--Spec.Data 1.txt --peak_ranges "[(400, 450), (600, 650)]"
+python main.py --file_path "data/mapping Ta50 20250213--Scan LA Step--007--Spec.Data 1.txt" --peak_ranges "[(400, 450), (600, 650)]"
 ```
 
 
