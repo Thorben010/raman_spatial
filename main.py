@@ -278,7 +278,6 @@ def main(args):
     # Plot all spectra
     df_clean.plot(legend=False)
     plt.savefig(f'{run_log_dir}/all_spectra.png')
-    plt.show()
     logging.info(f"  Saved: {run_log_dir}/all_spectra.png")
 
     logging.info("\n7. APPLYING SMOOTHING...")
@@ -288,7 +287,6 @@ def main(args):
     smoothed_df.plot(legend=False)
     plt.title("Smoothed Spectra")
     plt.savefig(f'{run_log_dir}/smoothed_spectra.png')
-    plt.show()
     logging.info(f"  Saved: {run_log_dir}/smoothed_spectra.png")
 
     logging.info("\n8. DEFINING PEAK RANGES...")
@@ -309,7 +307,6 @@ def main(args):
         plt.axvspan(entry[0], entry[1], color=colors[i % len(colors)], alpha=0.3)
     plt.title("Mean of Normalized Spectra with Peak Ranges")
     plt.savefig(f"{run_log_dir}/mean_normalized.png", dpi=600)
-    plt.show()
     logging.info(f"  Saved: {run_log_dir}/mean_normalized.png")
 
     logging.info("\n10. GENERATING SPATIAL GRID MAPS...")
