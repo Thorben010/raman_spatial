@@ -89,14 +89,15 @@ def filter_frequencies(df, frequency_range):
 
 def normalize_and_pca(df):
     """Normalizes the area under the curve of each spectrum to 1 and performs PCA to reduce data to 1D space"""
-    df_normalized = df
-    
+    # Normalize each column (spectrum) by its area under the curve (integral)
+    df_normalized = df.copy()
+    for col in df_normalized.columns:
+        df_normalized[col] = df_normalized[col] / np.trapz(df_normalized[col], df_normalized.index)
+
     # Perform PCA
     pca = PCA(n_components=1)
     principal_components = pca.fit_transform(df_normalized.T)
-    
-    df_normalized.plot(legend=None)
-    
+
     return pd.DataFrame(data=principal_components, columns=['PC1'])
 
 def plot_peak_shifts(df):
@@ -352,9 +353,6 @@ def main(args):
         logging.info(f"  Processing peak range {index+1}/{len(peak_ranges)}: {value}")
         df_filtered = filter_frequencies(df_clean, value)
         logging.info(f"    Filtered data shape: {df_filtered.shape}")
-        
-        logging.info("    Performing PCA analysis...")
-        pca_df = normalize_and_pca(df_filtered)
         
         logging.info("    Calculating peak shifts...")
         max_wavenumber, max_intensity, df_integration = plot_peak_shifts(df_filtered)
