@@ -124,10 +124,21 @@ def plot_map_heatmap(pca_df, positions, value, ax, label_cbar):
     spatial_coords = positions
     intensity_values = pca_df.values.flatten()
 
+    # Ensure we have the same number of points
+    if len(intensity_values) != len(spatial_coords):
+        logging.warning(f"Dimension mismatch: {len(intensity_values)} intensity values vs {len(spatial_coords)} positions")
+        # Truncate to the smaller size
+        min_size = min(len(intensity_values), len(spatial_coords))
+        intensity_values = intensity_values[:min_size]
+        spatial_coords = spatial_coords[:min_size]
+
     x_coords = spatial_coords[:, 0]
     y_coords = spatial_coords[:, 1]
 
-    heatmap, xedges, yedges, _ = binned_statistic_2d(x_coords, y_coords, intensity_values, statistic='mean', bins=50)
+    # Use a smaller number of bins to avoid empty bins
+    n_bins = min(20, int(np.sqrt(len(x_coords))))
+    heatmap, xedges, yedges, _ = binned_statistic_2d(x_coords, y_coords, intensity_values, 
+                                                    statistic='mean', bins=n_bins)
     X, Y = np.meshgrid(xedges, yedges)
     heatmap_plot = ax.pcolormesh(X, Y, heatmap.T, cmap='viridis', shading='auto')
 
@@ -237,11 +248,18 @@ def main(args):
 
     logging.info("\n2. CREATING SPATIAL GRID...")
     # Create spatial grid
-    grid_size = int(np.sqrt(len(df.columns)-1))
+    num_columns = len(df.columns)-1  # Subtract 1 for wavenumber column
+    grid_size = int(np.sqrt(num_columns))
+    logging.info(f'  Number of data points: {num_columns}')
     logging.info(f'  Grid size: {grid_size}x{grid_size}')
-    vector_grid_2d = np.linspace(0, grid_size, num=grid_size)
-    x, y = np.meshgrid(vector_grid_2d, vector_grid_2d)
-    positions = np.vstack((x.flatten(), y.flatten())).T
+    
+    # Create a proper grid
+    x = np.linspace(0, grid_size, num=grid_size)
+    y = np.linspace(0, grid_size, num=grid_size)
+    X, Y = np.meshgrid(x, y)
+    
+    # Flatten the grid and take only the number of points we need
+    positions = np.vstack((X.flatten()[:num_columns], Y.flatten()[:num_columns])).T
     logging.info(f"  Created {len(positions)} spatial positions")
 
     logging.info("\n3. FILTERING AND INDEXING DATA...")
@@ -387,7 +405,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Spatial Raman Analysis Pipeline")
     parser.add_argument('--file_path', type=str, 
-                        default='data/mapping Ta50 20250213--Scan LA Step--007--Spec.Data 1.txt',
+                        default='data/new_data.txt',
                         help='Path to the spectral data file.')
     parser.add_argument('--peak_ranges', type=str,
                         default="[(500.236, 530.236), (620.236, 670), (720.236, 750.236)]",
